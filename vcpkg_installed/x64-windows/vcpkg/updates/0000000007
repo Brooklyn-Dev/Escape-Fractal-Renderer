@@ -1,0 +1,6 @@
+Package: sdl2
+Feature: base
+Architecture: x64-windows
+Multi-Arch: same
+Description: Base functionality for SDL
+Status: install ok installed
