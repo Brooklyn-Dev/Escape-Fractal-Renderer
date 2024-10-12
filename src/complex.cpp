@@ -1,4 +1,4 @@
-#include "../include/complex.h"
+#include "../include/complex.hpp"
 
 // Add two complex numbers
 complex complexAdd(complex a, complex b) {

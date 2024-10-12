@@ -1,6 +1,6 @@
 ﻿#include <stdlib.h>
 
-#include "../include/fractal_renderer.h"
+#include "../include/fractal_renderer.hpp"
 
 const int WIN_WIDTH = 1600;
 const int WIN_HEIGHT = 900;

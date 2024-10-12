@@ -1,8 +1,11 @@
 #ifndef FRACTAL_RENDERER_H
 #define FRACTAL_RENDERER_H
 
+#include <vector>
+
 #include <SDL2/SDL.h>
-#include "fractals.h"
+
+#include "fractals.hpp"
 
 class FractalRenderer {
     public:
@@ -13,8 +16,9 @@ class FractalRenderer {
 
     private:
         void handleEvents();
+        void drawPixels(std::vector<std::vector<colour>> pixelBuffer);
+        void startRendering();
         void renderFrame();
-        void renderSection(int startX, int endX, int startY, int endY);
 
         SDL_Window* window;
         SDL_Renderer* renderer;
@@ -25,6 +29,7 @@ class FractalRenderer {
         double zoom;
         double offsetX;
         double offsetY;
+        bool recalculate;
         bool running;
 };
 

@@ -1,8 +1,8 @@
 #ifndef FRACTALS_H
 #define FRACTALS_H
 
-#include "../include/complex.h"
-#include "../include/colour.h"
+#include "../include/complex.hpp"
+#include "../include/colour.hpp"
 
 const int MAX_ITERATIONS = 128;
 
