@@ -1,4 +1,4 @@
-#include "colour.h"
+#include "../include/colour.h"
 #include <math.h>
 
 #define GRADIENT_STOP_COUNT 5

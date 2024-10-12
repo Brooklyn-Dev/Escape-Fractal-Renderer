@@ -27,15 +27,21 @@
     <ClCompile Include="src\fractals.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\fractal_renderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\complex.h">
+    <ClInclude Include="include\complex.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\colour.h">
+    <ClInclude Include="include\colour.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\fractals.h">
+    <ClInclude Include="include\fractals.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\fractal_renderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
