@@ -132,17 +132,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\colour.cpp" />
-    <ClCompile Include="src\complex.cpp" />
-    <ClCompile Include="src\fractals.cpp" />
-    <ClCompile Include="src\fractal_renderer.cpp" />
+    <ClCompile Include="src\colour\colour.cpp" />
+    <ClCompile Include="src\complex\complex.cpp" />
+    <ClCompile Include="src\fractals\fractals.cpp" />
+    <ClCompile Include="src\fractal_renderer\fractal_renderer.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\utils\math.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\colour.hpp" />
-    <ClInclude Include="include\complex.hpp" />
-    <ClInclude Include="include\fractals.hpp" />
-    <ClInclude Include="include\fractal_renderer.hpp" />
+    <ClInclude Include="src\colour\colour.hpp" />
+    <ClInclude Include="src\complex\complex.hpp" />
+    <ClInclude Include="src\fractals\fractals.hpp" />
+    <ClInclude Include="src\fractal_renderer\fractal_renderer.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

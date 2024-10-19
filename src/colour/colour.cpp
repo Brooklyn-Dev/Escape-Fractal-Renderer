@@ -1,5 +1,6 @@
-#include "../include/colour.hpp"
 #include <math.h>
+
+#include "colour.hpp"
 
 #define GRADIENT_STOP_COUNT 5
 const colour GRADIENT_STOPS[GRADIENT_STOP_COUNT] = {

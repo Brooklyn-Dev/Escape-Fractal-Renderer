@@ -1,4 +1,4 @@
-#include "../include/fractals.hpp"
+#include "fractals.hpp"
 
 complex screenToFractal(int px, int py, int width, int height, double zoom, double offsetX, double offsetY) {
     double minLength = fmin(width, height);
