@@ -22,7 +22,7 @@
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{6ddb4d95-6041-4891-96f7-d1e58fd279b3}</ProjectGuid>
-    <RootNamespace>FractalRenderer</RootNamespace>
+    <RootNamespace>ComplexFractalRenderer</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

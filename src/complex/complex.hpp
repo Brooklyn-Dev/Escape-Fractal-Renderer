@@ -6,14 +6,22 @@
 typedef struct complex {
     long double re;
     long double im;
+
+    complex operator+(const complex& w) const;
+    complex operator-(const complex& w) const;
+    complex operator*(const complex& w) const;
+    complex operator/(const complex& w) const;
+
+    complex operator+(long double scalar) const;
+    complex operator-(long double scalar) const;
+    complex operator*(long double scalar) const;
+    complex operator/(long double scalar) const;
 };
 
-complex complexAdd(complex a, complex b);
-complex complexSub(complex a, complex b);
-complex complexMul(complex a, complex b);
-complex complexDiv(complex a, complex b);
+complex complexConj(const complex& z);
+long double complexMag(const complex& z);
+long double complexMagSq(const complex& z);
 
-long double complexMag(complex a);
-long double complexMagSq(complex a);
+const complex I = complex{ 0, 1 };
 
 #endif

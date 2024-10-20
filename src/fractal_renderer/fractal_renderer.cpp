@@ -2,20 +2,26 @@
 #include <thread>
 
 #include "fractal_renderer.hpp"
-#include "../fractals/fractals.hpp"
 #include "../utils/math.hpp"
 
+const float MIN_REAL = -2.5;
+const float MAX_REAL = 2.5;
+const float MIN_IMAG = -2.5;
+const float MAX_IMAG = 2.5;
+
+const float MIN_ZOOM = 0.5;
+
 FractalRenderer::FractalRenderer(int width, int height)
-    : winWidth(width), winHeight(height) 
+    : winWidth(width), winHeight(height)
 {
     if (SDL_Init(SDL_INIT_VIDEO)) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Could not initialise SDL: %s", SDL_GetError());
         exit(EXIT_FAILURE);
     }
 
-    window = SDL_CreateWindow("Fractal Renderer", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, winWidth, winHeight, SDL_WINDOW_SHOWN);
+    window = SDL_CreateWindow("Complex Fractal Renderer", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, winWidth, winHeight, SDL_WINDOW_SHOWN);
     if (window == nullptr) {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't create window %s", SDL_GetError());
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't create window: %s", SDL_GetError());
         exit(EXIT_FAILURE);
     }
 
@@ -24,6 +30,14 @@ FractalRenderer::FractalRenderer(int width, int height)
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't create renderer: %s", SDL_GetError());
         exit(EXIT_FAILURE);
     }
+
+    fractalMap[SDLK_1] = processMandelbrot;
+    fractalMap[SDLK_2] = processTricorn;
+    fractalMap[SDLK_3] = processBurningShip;
+    fractalMap[SDLK_4] = processNewtonFractal;
+
+    curFractalFuncKey = SDLK_1;
+    fractalFunc = fractalMap[curFractalFuncKey];
 }
 
 FractalRenderer::~FractalRenderer() {
@@ -52,37 +66,61 @@ FractalRenderer::~FractalRenderer() {
 
 void FractalRenderer::handleEvents() {
     SDL_Event event;
+    SDL_Keycode eventKey;
     int mx, my;
 
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
         case SDL_QUIT:
+            // Quit
             running = false;
             break;
 
         case SDL_MOUSEBUTTONDOWN:
             if (event.button.button == SDL_BUTTON(SDL_BUTTON_LEFT)) {
+                // Set centre of screen at the point clicked
                 SDL_GetMouseState(&mx, &my);
 
-                complex c = screenToFractal(mx, my, winWidth, winHeight, targetZoom, targetOffsetX, targetOffsetY);
-                targetOffsetX = fmin(fmax(c.re, -2), 2);
-                targetOffsetY = fmin(fmax(c.im, -2), 2);
+                complex c = screenToFractal(mx, my, winWidth, winHeight, zoom, offsetX, offsetY);
+
+                offsetX = fmin(fmax(c.re, MIN_REAL), MAX_REAL);
+                offsetY = fmin(fmax(c.im, MIN_IMAG), MAX_IMAG);
+                startAsyncRendering();
             }
             break;
 
         case SDL_MOUSEWHEEL:
-            targetZoom *= (event.wheel.y > 0) ? 2.0 : 0.5;
-            targetZoom = fmax(targetZoom, 1.0);
+            // Update zoom level based on direction of scroll
+            zoom *= (event.wheel.y > 0) ? 2.0 : 0.5;
+            zoom = fmax(zoom, MIN_ZOOM);
+            startAsyncRendering();
             break;
 
         case SDL_KEYDOWN:
-            if (event.key.keysym.sym == SDLK_ESCAPE) {
+            eventKey = event.key.keysym.sym;
+
+            if (eventKey == SDLK_ESCAPE) {
+                // Quit
                 running = false;
+                break;
             }
-            else if (event.key.keysym.sym == SDLK_r) {
-                currentZoom = 1.0, targetZoom = 1.0;
-                currentOffsetX = 0.0, targetOffsetX = 0.0;
-                currentOffsetY = 0.0, targetOffsetY = 0.0;
+            else if (fractalMap.find(eventKey) != fractalMap.end()) {
+                if (eventKey == curFractalFuncKey)
+                    break;
+
+                // Set the fractal function
+                fractalFunc = fractalMap[eventKey];
+                curFractalFuncKey = eventKey;
+                startAsyncRendering();
+            }
+            else if (eventKey == SDLK_r) {
+                if (zoom == INITIAL_ZOOM && offsetX == INITIAL_OFFSET_X && offsetY == INITIAL_OFFSET_Y)
+                    break;
+
+                // Reset zoom and offset
+                zoom = INITIAL_ZOOM;
+                offsetX = INITIAL_OFFSET_X;
+                offsetY = INITIAL_OFFSET_Y;
                 startAsyncRendering();
             }
             break;
@@ -111,8 +149,8 @@ void FractalRenderer::startAsyncRendering() {
             // Render top tile (first half of height)
             for (int x = startX; x < endX; x++) {
                 for (int y = 0; y < sectionHeight; y++) {
-                    complex c = screenToFractal(x, y, winWidth, winHeight, targetZoom, targetOffsetX, targetOffsetY);
-                    colour col = processMandelbrot(c, MAX_ITERATIONS);
+                    complex c = screenToFractal(x, y, winWidth, winHeight, zoom, offsetX, offsetY);
+                    colour col = fractalFunc(c, MAX_ITERATIONS);
                     pixelBuffer[x][y] = col;
                 }
             }
@@ -133,8 +171,8 @@ void FractalRenderer::startAsyncRendering() {
             // Render bottom tile (second half of height)
             for (int x = startX; x < endX; x++) {
                 for (int y = sectionHeight; y < winHeight; y++) {
-                    complex c = screenToFractal(x, y, winWidth, winHeight, targetZoom, targetOffsetX, targetOffsetY);
-                    colour col = processMandelbrot(c, MAX_ITERATIONS);
+                    complex c = screenToFractal(x, y, winWidth, winHeight, zoom, offsetX, offsetY);
+                    colour col = fractalFunc(c, MAX_ITERATIONS);
                     pixelBuffer[x][y] = col;
                 }
             }
@@ -170,36 +208,13 @@ void FractalRenderer::renderFrame() {
     updateCachedFrame = false;
 }
 
-void FractalRenderer::updateFrame(double deltaTime) {
-    double t = deltaTime * 0.5;
-
-    currentZoom = lerp(currentZoom, targetZoom, t);
-    currentOffsetX = lerp(currentOffsetX, targetOffsetX, t);
-    currentOffsetY = lerp(currentOffsetY, targetOffsetY, t);
-
-    bool zoomAtTarget = std::abs(currentZoom - targetZoom) < 0.0001;
-    bool offsetXAtTarget = std::abs(currentOffsetX - targetOffsetX) < 0.0001;
-    bool offsetYAtTarget = std::abs(currentOffsetY - targetOffsetY) < 0.0001;
-
-    if (!zoomAtTarget || !offsetXAtTarget || !offsetYAtTarget)
-        startAsyncRendering();
-}
-
 void FractalRenderer::run() {
-    Uint32 lastFrameTime = SDL_GetTicks();
-
     pixelBuffer.resize(winWidth, std::vector<colour>(winHeight));
 
     startAsyncRendering();
 
     while (running) {
-        Uint32 currentFrameTime = SDL_GetTicks();
-        double deltaTime = (currentFrameTime - lastFrameTime) / 1000.0;
-        lastFrameTime = currentFrameTime;
-
         handleEvents();
-
-        updateFrame(deltaTime);
 
         // Wait for the rendering thread to notify that recalculation is done
         {

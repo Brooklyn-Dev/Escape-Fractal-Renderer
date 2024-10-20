@@ -10,4 +10,6 @@ typedef struct colour {
 colour colourLerp(colour a, colour b, float t);
 colour colourGradient(int iteration, int maxIterations);
 
+const colour BLACK = colour{ 0, 0, 0 };
+
 #endif
